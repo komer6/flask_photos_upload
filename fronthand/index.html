@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Uploader</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="scripts.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        img {
+            max-width: 200px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Upload an Image</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*">
+        <button type="submit">Upload</button>
+    </form>
+
+    <h2>Uploaded Images</h2>
+    <div id="images"></div>
+</body>
+<script>
+    const API_URL = 'http://127.0.0.1:5000/api';
+
+// Handle file upload
+const form = document.getElementById('uploadForm');
+const fileInput = document.getElementById('fileInput');
+const imagesDiv = document.getElementById('images');
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Please select a file!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await axios.post(`${API_URL}/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        alert(response.data.message);
+        fetchImages(); // Refresh the images list
+    } catch (error) {
+        alert(error.response.data.error || 'Error uploading file');
+        console.error('Upload error:', error);
+    }
+});
+
+// Fetch and display images
+const fetchImages = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/images`);
+        imagesDiv.innerHTML = '';
+
+        response.data.forEach((image) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = `${API_URL.replace('/api', '')}/uploads/${image.filename}`;
+            imagesDiv.appendChild(imgElement);
+        });
+    } catch (error) {
+        console.error('Error fetching images:', error);
+    }
+};
+
+// Load images on page load
+fetchImages();
+
+</script>
+</html>
