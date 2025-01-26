@@ -1,0 +1,297 @@
+/* Reset some basic styles */
+body, h1, h2, h3, p, ul, li {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Set the main background */
+  body {
+    background-color: #f9fdf9; /* Light greenish white */
+    color: #333;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Main content styling */
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+  }
+  
+  /* Header styling */
+  header {
+    background-color: #4caf50; /* Soft green */
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+  }
+  
+  /* Buttons */
+  button {
+    background-color: #4caf50; /* Soft green */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Form styling */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  form label {
+    font-weight: bold;
+  }
+  
+  form input, form select {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Table styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  table th {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  /* Footer styling */
+  footer {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  /* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #4CAF50;
+    padding: 1rem;
+}
+
+.navbar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar li {
+    margin: 0 1rem;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.navbar a:hover {
+    background-color: #45a049;
+}
+
+.navbar a.active {
+    background-color: #366636;
+}
+
+/* Content Styles */
+.content {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.content h1 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.content p {
+    font-size: 1.2rem;
+    color: #666;
+}
+/* Styles for user cards */
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    width: 200px;  /* Adjust width for better fit */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+    margin-right: 20px; /* Add space between cards */
+}
+
+/* User info styling */
+.user-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.user-email {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+/* Actions container */
+.user-actions {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Button styles */
+.delete-button, .view-button, .manage-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+/* Delete button styles */
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
+}
+
+/* View button styles (green) */
+.view-button {
+    background-color: #2ecc71;  /* Green background */
+    color: white;
+}
+
+.view-button:hover {
+    background-color: #27ae60;  /* Darker green on hover */
+}
+
+/* Manage button styles (blue) */
+.manage-button {
+    background-color: #1e90ff;
+    color: white;
+}
+
+.manage-button:hover {
+    background-color: #4682b4;  /* Slightly darker blue */
+}
+
+/* Layout for user table */
+.user-table {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center align the cards */
+    margin: 0 auto;
+    gap: 20px; /* Add space between cards */
+}
+
+/* Adjust card width inside the table */
+.user-table td {
+    padding: 1rem;
+    vertical-align: top;
+    width: auto; /* Let cards take up as much space as needed */
+}
+
+/* Ensure card takes full width in the table */
+.user-card {
+    width: 80%;
+    margin-bottom: 1rem;
+}
+
+/* Optional: Control card height */
+.user-card img {
+    max-width: 100%;
+    height: auto;
+}
+.user-table {
+    width: 100%;
+    border-collapse: collapse; /* Keep this */
+    margin-top: 20px; /* Optional */
+}
+
+
+.user-table th, .user-table td {
+    text-align: left; /* Aligns text to the left */
+    padding: 8px; /* Adds consistent padding */
+    border: 1px solid #ddd; /* Adds borders to cells */
+    width: auto; /* Ensures columns align automatically */
+}
+
+.user-table thead th {
+    background-color: #4CAF50; /* Optional: Highlight the header row */
+    color: white; /* Text color for the header */
+}
+
+.user-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Adds alternating row colors */
+}
+
+.user-table tbody tr:hover {
+    background-color: #f1f1f1; /* Adds a hover effect */
+}
+#userResults {
+    display: block; /* Ensures proper block-level rendering */
+    width: 100%; /* Matches the table width */
+    overflow-x: auto; /* Handles table overflow */
+}

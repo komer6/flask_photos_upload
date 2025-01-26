@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Uploader</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="add_user.html">Add User</a></li>
+            <li><a href="add_book.html">Add Book</a></li>
+            <li><a href="all_users.html"> view all users</a></li>
+            <li><a href="all_books.html"> view all books</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1>Welcome to the Library Management System</h1>
+        <p>Manage your books and users effortlessly!</p>
+    </div>
+    <h1>Upload a Book</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*"><br>
+        <input type="text" id="name" placeholder="Book Name" required><br>
+        <input type="text" id="author" placeholder="Author" required><br>
+        <input type="text" id="genre" placeholder="Genre" required><br>
+        <input type="number" id="year" placeholder="Year" required><br>
+        <input type="number" id="amount" placeholder="Amount" required><br>
+        <input type="number" id="loandate" placeholder="Loan Date (in days)" required><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api';
+
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file!');
+                return;
+            }
+
+            // Convert form data to JSON
+            const payload = {
+                name: document.getElementById('name').value,
+                author: document.getElementById('author').value,
+                genre: document.getElementById('genre').value,
+                year: parseInt(document.getElementById('year').value, 10),
+                amount: parseInt(document.getElementById('amount').value, 10),
+                loandate: parseInt(document.getElementById('loandate').value, 10),
+            };
+
+            try {
+                // Upload file
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const fileResponse = await axios.post(`${API_URL}/upload-file`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                // Add the filename from the file upload response
+                payload.filename = fileResponse.data.filename;
+
+                // Send metadata as JSON
+                const metadataResponse = await axios.post(`${API_URL}/upload-metadata`, payload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                alert('Book uploaded successfully!');
+                form.reset();
+            } catch (error) {
+                console.error('Error uploading book:', error);
+                alert('An error occurred while uploading the book. Please try again.');
+            }
+        });
+    </script>
+</body>
+
+</html>

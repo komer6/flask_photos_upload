@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Users</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="add_user.html">Add User</a></li>
+            <li><a href="add_book.html">Add Book</a></li>
+            <li><a href="all_users.html"> view all users</a></li>
+            <li><a href="all_books.html"> view all books</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1>Welcome to the User Management System</h1>
+        <p>Manage and view all users effortlessly!</p>
+    </div>
+
+    <h2>All Users</h2>
+
+    <!-- Table for displaying all users -->
+    <div class="result-list" id="userResults">
+        <!-- Users will be displayed here -->
+    </div>
+
+    <script>
+        // Function to display all users by default
+        async function displayAllUsers() {
+            try {
+                const response = await axios.get('http://127.0.0.1:5000/api/users');
+                const users = response.data;
+
+                const userResults = document.getElementById('userResults');
+                userResults.innerHTML = ''; // Clear previous results
+
+                if (users.length > 0) {
+                    let table = `<table class="book-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                    users.forEach(user => {
+                        table += `
+                            <tr id="user-${user.id}">
+                                <td class="user-name">${user.name}</td>
+                                <td class="user-email">${user.email}</td>
+                                <td>
+                                    <button class="manage-button" onclick="manageUser(${user.id})">Manage</button>
+                                    <span class="delete-button" onclick="deleteUser(${user.id})">Delete</span>
+                                    <span class="view-button" onclick="viewUser(${user.id})">View</span>
+                                </td>
+                            </tr>`;
+                    });
+
+                    table += `</tbody></table>`;
+                    userResults.innerHTML = table;
+                } else {
+                    userResults.textContent = 'No users found';
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        // Call the display function when the page loads
+        window.onload = displayAllUsers;
+
+        // Function to manage a user (edit user)
+        function manageUser(userId) {
+            const userRow = document.getElementById(`user-${userId}`);
+            
+            // Get the current data of the user
+            const name = userRow.querySelector('.user-name').textContent;
+            const email = userRow.querySelector('.user-email').textContent;
+
+            // Replace the row content with an editable form
+            userRow.innerHTML = `
+                <td><input type="text" id="edit-name-${userId}" value="${name}"></td>
+                <td><input type="text" id="edit-email-${userId}" value="${email}"></td>
+                <td>
+                    <button class="save-button" onclick="saveUser(${userId})">Save</button>
+                    <button class="cancel-button" onclick="cancelEditUser(${userId}, '${name}', '${email}')">Cancel</button>
+                </td>
+            `;
+        }
+
+        // Function to save the updated user data
+        async function saveUser(userId) {
+            const updatedName = document.getElementById(`edit-name-${userId}`).value;
+            const updatedEmail = document.getElementById(`edit-email-${userId}`).value;
+
+            if (!updatedName || !updatedEmail) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                await axios.put(`http://127.0.0.1:5000/api/update-user/${userId}`, {
+                    name: updatedName,
+                    email: updatedEmail
+                });
+
+                alert('User updated successfully');
+                displayAllUsers();  // Re-fetch the list of users to see the changes
+            } catch (error) {
+                console.error('Error updating user:', error);
+            }
+        }
+
+        // Function to cancel the edit and revert to the previous data
+        function cancelEditUser(userId, originalName, originalEmail) {
+            const userRow = document.getElementById(`user-${userId}`);
+            userRow.innerHTML = `
+                <td class="user-name">${originalName}</td>
+                <td class="user-email">${originalEmail}</td>
+                <td>
+                    <button class="manage-button" onclick="manageUser(${userId})">Manage</button>
+                    <span class="delete-button" onclick="deleteUser(${userId})">Delete</span>
+                    <span class="view-button" onclick="viewUser(${userId})">View</span>
+                </td>
+            `;
+        }
+
+        // Function to delete a user
+// Function to delete a user
+async function deleteUser(userId) {
+    try {
+        await axios.delete(`http://127.0.0.1:5000/api/users/${userId}`);
+        alert('User deleted successfully');
+        displayAllUsers();  // Re-fetch the list of users
+    } catch (error) {
+        console.error('Error deleting user:', error);
+    }
+}
+
+
+        // Function to view user page
+        function viewUser(userId) {
+            window.location.href = `user.html?id=${userId}`;
+        }
+    </script>
+</body>
+
+</html>

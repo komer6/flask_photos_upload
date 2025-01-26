@@ -4,84 +4,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Uploader</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="scripts.js" defer></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+    <title>Home Page</title>
+    <link rel="stylesheet" href="styles.css">
 
-        img {
-            max-width: 200px;
-            margin: 10px;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 
 <body>
-    <h1>Upload an Image</h1>
-    <form id="uploadForm">
-        <input type="file" id="fileInput" accept="image/*">
-        <button type="submit">Upload</button>
-    </form>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="add_user.html">Add User</a></li>
+            <li><a href="add_book.html">Add Book</a></li>
+            <li><a href="all_users.html"> view all users</a></li>
+            <li><a href="all_books.html"> view all books</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1>Welcome to the Library Management System</h1>
+        <p>Manage your books and users effortlessly!</p>
+    </div>
+    <h1>Welcome to the Book & User Search</h1>
 
-    <h2>Uploaded Images</h2>
-    <div id="images"></div>
+    <!-- Search for Users -->
+ <!-- Search for Users -->
+<div class="search-section">
+    <h2>Search Users</h2>
+    <input type="text" id="userSearch" placeholder="Search" />
+    <div class="search-option">
+        <input type="radio" id="searchByName" name="userSearchType" value="name" checked />
+        <label for="searchByName">By Name</label>
+        <input type="radio" id="searchByEmail" name="userSearchType" value="email" />
+        <label for="searchByEmail">By Email</label>
+    </div>
+    <button onclick="searchUsers()">Search</button>
+    <div class="result-list" id="userResults"></div>
+</div>
+
+<!-- Search for Books -->
+<div class="search-section">
+    <h2>Search Books</h2>
+    <input type="text" id="bookSearchTerm" placeholder="Enter Search Term" />
+    <div class="search-option">
+        <input type="radio" id="searchByTitle" name="bookSearchType" value="title" checked />
+        <label for="searchByTitle">By Title</label>
+        <input type="radio" id="searchByAuthor" name="bookSearchType" value="author" />
+        <label for="searchByAuthor">By Author</label>
+        <input type="radio" id="searchByYear" name="bookSearchType" value="year" />
+        <label for="searchByYear">By Year</label>
+    </div>
+    <button onclick="searchBooks()">Search</button>
+    <div class="result-list" id="bookResults"></div>
+</div>
 </body>
-<script>
-    const API_URL = 'http://127.0.0.1:5000/api';
-
-// Handle file upload
-const form = document.getElementById('uploadForm');
-const fileInput = document.getElementById('fileInput');
-const imagesDiv = document.getElementById('images');
-
-form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const file = fileInput.files[0];
-    if (!file) {
-        alert('Please select a file!');
+    <script>
+   async function searchUsers() {
+    const searchTerm = document.getElementById('userSearch').value;
+    if (!searchTerm) {
+        alert('Please enter a search term!');
         return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const searchType = document.querySelector('input[name="userSearchType"]:checked').value;
 
     try {
-        const response = await axios.post(`${API_URL}/upload`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        alert(response.data.message);
-        fetchImages(); // Refresh the images list
-    } catch (error) {
-        alert(error.response.data.error || 'Error uploading file');
-        console.error('Upload error:', error);
-    }
-});
+        let response;
+        if (searchType === 'name') {
+            response = await axios.get(`http://127.0.0.1:5000/api/search-users?name=${searchTerm}`);
+        } else if (searchType === 'email') {
+            response = await axios.get(`http://127.0.0.1:5000/api/search-users?email=${searchTerm}`);
+        }
 
-// Fetch and display images
-const fetchImages = async () => {
+        const users = response.data;
+
+        const userResults = document.getElementById('userResults');
+        userResults.innerHTML = ''; // Clear previous results
+        if (users.length > 0) {
+            let table = `<table class="book-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            users.forEach(user => {
+                table += `
+                    <tr id="user-${user.id}">
+                        <td class="user-name">${user.name}</td>
+                        <td class="user-email">${user.email}</td>
+                        <td>
+                            <button class="manage-button" onclick="manageUser(${user.id})">Manage</button>
+                            <span class="delete-button" onclick="deleteUser(${user.id})">Delete</span>
+                            <span class="view-button" onclick="viewUser(${user.id})">View</span>
+                        </td>
+                    </tr>`;
+            });
+
+            table += `</tbody></table>`;
+            userResults.innerHTML = table;
+        } else {
+            userResults.textContent = 'No users found';
+        }
+    } catch (error) {
+        console.error('Error searching users:', error);
+    }
+}
+
+function manageUser(userId) {
+    const userRow = document.getElementById(`user-${userId}`);
+    
+    // Get the current data of the user
+    const name = userRow.querySelector('.user-name').textContent;
+    const email = userRow.querySelector('.user-email').textContent;
+
+    // Replace the row content with an editable form
+    userRow.innerHTML = `
+        <td><input type="text" id="edit-name-${userId}" value="${name}"></td>
+        <td><input type="text" id="edit-email-${userId}" value="${email}"></td>
+        <td>
+            <button class="save-button" onclick="saveUser(${userId})">Save</button>
+            <button class="cancel-button" onclick="cancelEditUser(${userId}, '${name}', '${email}')">Cancel</button>
+        </td>
+    `;
+}
+
+// Function to save the updated user data
+async function saveUser(userId) {
+    const updatedName = document.getElementById(`edit-name-${userId}`).value;
+    const updatedEmail = document.getElementById(`edit-email-${userId}`).value;
+
+    if (!updatedName || !updatedEmail) {
+        alert('Please fill in all fields');
+        return;
+    }
+
     try {
-        const response = await axios.get(`${API_URL}/images`);
-        imagesDiv.innerHTML = '';
-
-        response.data.forEach((image) => {
-            const imgElement = document.createElement('img');
-            imgElement.src = `${API_URL.replace('/api', '')}/uploads/${image.filename}`;
-            imagesDiv.appendChild(imgElement);
+        await axios.put(`http://127.0.0.1:5000/api/update-user/${userId}`, {
+            name: updatedName,
+            email: updatedEmail
         });
+
+        alert('User updated successfully');
+        searchUsers();  // Re-fetch the list of users to see the changes
     } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error('Error updating user:', error);
     }
-};
+}
 
-// Load images on page load
-fetchImages();
+// Function to cancel the edit and revert to the previous data
+function cancelEditUser(userId, originalName, originalEmail) {
+    const userRow = document.getElementById(`user-${userId}`);
+    userRow.innerHTML = `
+        <td class="user-name">${originalName}</td>
+        <td class="user-email">${originalEmail}</td>
+        <td>
+            <button class="manage-button" onclick="manageUser(${userId})">Manage</button>
+            <span class="delete-button" onclick="deleteUser(${userId})">Delete</span>
+            <span class="view-button" onclick="viewUser(${user.id})">View</span>
+        </td>
+    `;
+}
 
-</script>
+
+
+
+
+        async function searchBooks() {
+    const searchTerm = document.getElementById('bookSearchTerm').value;
+    if (!searchTerm) {
+        alert('Please enter a search term!');
+        return;
+    }
+
+    const searchType = document.querySelector('input[name="bookSearchType"]:checked').value;
+
+    try {
+        let response;
+        if (searchType === 'title') {
+            response = await axios.get(`http://127.0.0.1:5000/api/search-books?title=${searchTerm}`);
+        } else if (searchType === 'author') {
+            response = await axios.get(`http://127.0.0.1:5000/api/search-books?author=${searchTerm}`);
+        } else {
+            response = await axios.get(`http://127.0.0.1:5000/api/search-books?year=${searchTerm}`);
+        }
+
+        const books = response.data;
+
+        const bookResults = document.getElementById('bookResults');
+        bookResults.innerHTML = ''; // Clear previous results
+        if (books.length > 0) {
+            let table = `<table class="book-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Genre</th>
+                                    <th>Year</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            books.forEach(book => {
+                table += `
+                    <tr id="book-${book.id}">
+                        <td class="book-title">${book.name}</td>
+                        <td class="book-author">${book.author}</td>
+                        <td class="book-genre">${book.genre}</td>
+                        <td class="book-year">${book.year}</td>
+                        <td>
+                            <button class="manage-button" onclick="manageBook(${book.id})">Manage</button>
+                            <span class="delete-button" onclick="deleteBook(${book.id})">Delete</span>
+                        </td>
+                    </tr>`;
+            });
+
+            table += `</tbody></table>`;
+            bookResults.innerHTML = table;
+        } else {
+            bookResults.textContent = 'No books found';
+        }
+    } catch (error) {
+        console.error('Error searching books:', error);
+    }
+}
+// Function to cancel the edit and revert to the previous data
+function cancelEdit(bookId, originalTitle, originalAuthor, originalGenre, originalYear) {
+    const bookRow = document.getElementById(`book-${bookId}`);
+    bookRow.innerHTML = `
+        <td class="book-title">${originalTitle}</td>
+        <td class="book-author">${originalAuthor}</td>
+        <td class="book-genre">${originalGenre}</td>
+        <td class="book-year">${originalYear}</td>
+        <td>
+            <button class="manage-button" onclick="manageBook(${bookId})">Manage</button>
+            <span class="delete-button" onclick="deleteBook(${bookId})">Delete</span>
+        </td>
+    `;
+}
+        // Function to delete a user
+        async function deleteUser(userId) {
+            try {
+                await axios.delete(`http://127.0.0.1:5000/api/users/${userId}`);
+                alert('User deleted successfully');
+                searchUsers();  // Re-fetch the list of users
+            } catch (error) {
+                console.error('Error deleting user:', error);
+            }
+        }
+
+        // Function to delete a book
+        async function deleteBook(bookId) {
+            try {
+                await axios.delete(`http://127.0.0.1:5000/api/books/${bookId}`);
+                alert('Book deleted successfully');
+                searchBooks();  // Re-fetch the list of books
+            } catch (error) {
+                console.error('Error deleting book:', error);
+            }
+        }
+
+        // Function to manage a book (edit book)
+function manageBook(bookId) {
+    const bookRow = document.getElementById(`book-${bookId}`);
+    
+    // Get the current data of the book
+    const title = bookRow.querySelector('.book-title').textContent;
+    const author = bookRow.querySelector('.book-author').textContent;
+    const genre = bookRow.querySelector('.book-genre').textContent;
+    const year = bookRow.querySelector('.book-year').textContent;
+
+    // Replace the row content with an editable form
+    bookRow.innerHTML = `
+        <td><input type="text" id="edit-title-${bookId}" value="${title}"></td>
+        <td><input type="text" id="edit-author-${bookId}" value="${author}"></td>
+        <td><input type="text" id="edit-genre-${bookId}" value="${genre}"></td>
+        <td><input type="text" id="edit-year-${bookId}" value="${year}"></td>
+        <td>
+            <button class="save-button" onclick="saveBook(${bookId})">Save</button>
+            <button class="cancel-button" onclick="cancelEdit(${bookId}, '${title}', '${author}', '${genre}', '${year}')">Cancel</button>
+        </td>
+    `;
+}
+
+// Function to save the updated book
+async function saveBook(bookId) {
+    const updatedTitle = document.getElementById(`edit-title-${bookId}`).value;
+    const updatedAuthor = document.getElementById(`edit-author-${bookId}`).value;
+    const updatedGenre = document.getElementById(`edit-genre-${bookId}`).value;
+    const updatedYear = document.getElementById(`edit-year-${bookId}`).value;
+
+    if (!updatedTitle || !updatedAuthor || !updatedGenre || !updatedYear) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    try {
+        await axios.put(`http://127.0.0.1:5000/api/update-book/${bookId}`, {
+            name: updatedTitle,
+            author: updatedAuthor,
+            genre: updatedGenre,
+            year: updatedYear
+        });
+
+        alert('Book updated successfully');
+        searchBooks();  // Re-fetch the list of books to see the changes
+    } catch (error) {
+        console.error('Error updating book:', error);
+    }
+}
+        
+
+        // Function to view user page
+        function viewUser(userId) {
+            window.location.href = `user.html?id=${userId}`;
+        }
+
+    </script>
+
+</body>
+
 </html>

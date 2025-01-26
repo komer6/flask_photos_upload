@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Books</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="add_user.html">Add User</a></li>
+            <li><a href="add_book.html">Add Book</a></li>
+            <li><a href="all_users.html"> view all users</a></li>
+            <li><a href="all_books.html"> view all books</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1>Welcome to the Book Management System</h1>
+        <p>Manage and view all books effortlessly!</p>
+    </div>
+
+    <h2>All Books</h2>
+
+    <!-- Table for displaying all books -->
+    <div class="result-list" id="bookResults">
+        <!-- Books will be displayed here -->
+    </div>
+
+    <script>
+        // Function to display all books by default
+        async function displayAllBooks() {
+            try {
+                const response = await axios.get('http://127.0.0.1:5000/api/books');
+                const books = response.data;
+
+                const bookResults = document.getElementById('bookResults');
+                bookResults.innerHTML = ''; // Clear previous results
+
+                if (books.length > 0) {
+                    let table = `<table class="book-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Author</th>
+                                            <th>Genre</th>
+                                            <th>Year</th>
+                                            <th>Image</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+
+                    books.forEach(book => {
+                        table += `
+                            <tr id="book-${book.id}">
+                                <td class="book-title">${book.name}</td>
+                                <td class="book-author">${book.author}</td>
+                                <td class="book-genre">${book.genre}</td>
+                                <td class="book-year">${book.year}</td>
+                                <td><img src="http://127.0.0.1:5000/uploads/${book.image}" class="book-image" alt="Book Image"></td>
+                                <td>
+                                    <button class="manage-button" onclick="manageBook(${book.id})">Manage</button>
+                                    <span class="delete-button" onclick="deleteBook(${book.id})">Delete</span>
+                                </td>
+                            </tr>`;
+                    });
+
+                    table += `</tbody></table>`;
+                    bookResults.innerHTML = table;
+                } else {
+                    bookResults.textContent = 'No books found';
+                }
+            } catch (error) {
+                console.error('Error fetching books:', error);
+            }
+        }
+
+        // Call the display function when the page loads
+        window.onload = displayAllBooks;
+
+        // Function to manage a book (edit book)
+        function manageBook(bookId) {
+            const bookRow = document.getElementById(`book-${bookId}`);
+
+            // Get the current data of the book
+            const title = bookRow.querySelector('.book-title').textContent;
+            const author = bookRow.querySelector('.book-author').textContent;
+            const genre = bookRow.querySelector('.book-genre').textContent;
+            const year = bookRow.querySelector('.book-year').textContent;
+            const imageSrc = bookRow.querySelector('.book-image').src.split('/').pop();
+
+            // Replace the row content with an editable form
+            bookRow.innerHTML = `
+                <td><input type="text" id="edit-title-${bookId}" value="${title}"></td>
+                <td><input type="text" id="edit-author-${bookId}" value="${author}"></td>
+                <td><input type="text" id="edit-genre-${bookId}" value="${genre}"></td>
+                <td><input type="text" id="edit-year-${bookId}" value="${year}"></td>
+                <td><img src="http://127.0.0.1:5000/uploads/${imageSrc}" class="book-image" alt="Book Image"></td>
+                <td>
+                    <button class="save-button" onclick="saveBook(${bookId})">Save</button>
+                    <button class="cancel-button" onclick="cancelEdit(${bookId}, '${title}', '${author}', '${genre}', '${year}', '${imageSrc}')">Cancel</button>
+                </td>
+            `;
+        }
+
+        // Function to save the updated book
+        async function saveBook(bookId) {
+    const updatedTitle = document.getElementById(`edit-title-${bookId}`).value;
+    const updatedAuthor = document.getElementById(`edit-author-${bookId}`).value;
+    const updatedGenre = document.getElementById(`edit-genre-${bookId}`).value;
+    const updatedYear = document.getElementById(`edit-year-${bookId}`).value;
+
+    if (!updatedTitle || !updatedAuthor || !updatedGenre || !updatedYear) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    try {
+        await axios.put(`http://127.0.0.1:5000/api/update-book/${bookId}`, {
+            name: updatedTitle,
+            author: updatedAuthor,
+            genre: updatedGenre,
+            year: updatedYear
+        });
+
+        alert('Book updated successfully');
+        searchBooks();  // Re-fetch the list of books to see the changes
+    } catch (error) {
+        console.error('Error updating book:', error);
+    }
+}
+
+        // Function to cancel the edit and revert to the previous data
+        function cancelEdit(bookId, originalTitle, originalAuthor, originalGenre, originalYear, originalImage) {
+            const bookRow = document.getElementById(`book-${bookId}`);
+            bookRow.innerHTML = `
+                <td class="book-title">${originalTitle}</td>
+                <td class="book-author">${originalAuthor}</td>
+                <td class="book-genre">${originalGenre}</td>
+                <td class="book-year">${originalYear}</td>
+                <td><img src="http://127.0.0.1:5000/uploads/${originalImage}" class="book-image" alt="Book Image"></td>
+                <td>
+                    <button class="manage-button" onclick="manageBook(${bookId})">Manage</button>
+                    <span class="delete-button" onclick="deleteBook(${bookId})">Delete</span>
+                </td>
+            `;
+        }
+
+        // Function to delete a book
+        async function deleteBook(bookId) {
+            try {
+                await axios.delete(`http://127.0.0.1:5000/api/books/${bookId}`);
+                alert('Book deleted successfully');
+                displayAllBooks();  // Re-fetch the list of books
+            } catch (error) {
+                console.error('Error deleting book:', error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
